@@ -1,0 +1,27 @@
+name: scrape tweets
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron:  '0 7 * * *'
+
+jobs:
+  scrape_tweets:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'
+      - name: install minet
+        run: |
+          python -m pip install --upgrade pip
+          pip install minet==0.52.6
+      - name: scrape @datagouvfr tweets
+        shell: bash
+        run: |
+          minet tw scrape tweets "from:@datagouvfr" --limit 10000 -o datagouvfr-tweets.csv
+      - name: commit
+        uses: ./.github/actions/commit
+        with:
+          message: 🐦 @datagouvfr
